@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { tsbReference } from "@/lib/tsb";
+import { tsbReference } from "../../lib/tsb";
 
-// GET - TSB listesini getir
 export async function GET() {
   return NextResponse.json({
     success: true,
@@ -10,7 +9,6 @@ export async function GET() {
   });
 }
 
-// POST - TSB yükle (VA-only, şimdilik mock)
 export async function POST(req: Request) {
   const formData = await req.formData();
   const file = formData.get("file");
@@ -22,7 +20,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Mock: Başarılı yükleme
   return NextResponse.json({
     success: true,
     message: "TSB listesi yüklendi",

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { validateTSB } from "@/lib/tsb";
+import { validateTSB } from "../../../lib/tsb";
 
-// Mock veritabanı
 const vehicles: any[] = [];
 
 export async function POST(req: Request) {
@@ -9,7 +8,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { customerId, vehicles: vehicleList } = body;
 
-    // customerId zorunlu
     if (!customerId) {
       return NextResponse.json(
         { 
@@ -21,17 +19,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const results = {
-      successCount: 0,
-      failCount: 0,
-      errors: [] as any[],
-    };
+    const results = { successCount: 0, failCount: 0, errors: [] as any[] };
 
     for (let i = 0; i < vehicleList.length; i++) {
       const v = vehicleList[i];
       const row = i + 1;
 
-      // Zorunlu alanlar
       if (!v.plaka) {
         results.errors.push({ row, field: "plaka", reason: "Plaka zorunludur" });
         results.failCount++;
@@ -44,18 +37,12 @@ export async function POST(req: Request) {
         continue;
       }
 
-      // TSB validasyonu
       if (!validateTSB(v.marka, v.model, parseInt(v.modelYili))) {
-        results.errors.push({ 
-          row, 
-          field: "marka/model/modelYili", 
-          reason: "TSB'de kayıtlı değil" 
-        });
+        results.errors.push({ row, field: "marka/model/modelYili", reason: "TSB'de kayıtlı değil" });
         results.failCount++;
         continue;
       }
 
-      // Plaka tekil kontrolü
       const existingPlate = vehicles.find(ve => ve.plaka === v.plaka);
       if (existingPlate) {
         results.errors.push({ row, field: "plaka", reason: "Plaka zaten kayıtlı" });
@@ -63,7 +50,6 @@ export async function POST(req: Request) {
         continue;
       }
 
-      // Şasi tekil kontrolü
       const existingSasi = vehicles.find(ve => ve.sasiNo === v.sasiNo);
       if (existingSasi) {
         results.errors.push({ row, field: "sasiNo", reason: "Şasi No zaten kayıtlı" });
@@ -71,7 +57,6 @@ export async function POST(req: Request) {
         continue;
       }
 
-      // Kaydet
       vehicles.push({
         id: `v-${Date.now()}-${i}`,
         ...v,
@@ -85,17 +70,12 @@ export async function POST(req: Request) {
     return NextResponse.json(results);
   } catch (error: any) {
     return NextResponse.json(
-      { 
-        successCount: 0, 
-        failCount: 1, 
-        errors: [{ row: 0, field: "general", reason: error.message }] 
-      },
+      { successCount: 0, failCount: 1, errors: [{ row: 0, field: "general", reason: error.message }] },
       { status: 500 }
     );
   }
 }
 
-// GET - Yüklenen araçları listele
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const customerId = searchParams.get("customerId");
@@ -105,9 +85,5 @@ export async function GET(req: Request) {
     result = vehicles.filter(v => v.customerId === customerId);
   }
 
-  return NextResponse.json({
-    success: true,
-    data: result,
-    count: result.length,
-  });
+  return NextResponse.json({ success: true, data: result, count: result.length });
 }
