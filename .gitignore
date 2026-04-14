@@ -1,0 +1,5 @@
+node_modules
+.next
+tsb_mock_mini.xlsx
+tsb_uzun_format.xlsx
+tsb_convert.py

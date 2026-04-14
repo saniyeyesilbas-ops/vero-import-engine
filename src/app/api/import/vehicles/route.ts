@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateTSB } from "../../../lib/tsb";
+import { validateTSB } from "../../../../lib/tsb";
 
 const vehicles: any[] = [];
 
